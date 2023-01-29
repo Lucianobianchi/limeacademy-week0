@@ -149,24 +149,48 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "borrowHistory",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "getAvailableBooks",
 				"outputs": [
 					{
 						"components": [
 							{
-								"internalType": "string",
-								"name": "name",
-								"type": "string"
+								"internalType": "uint256",
+								"name": "bookId",
+								"type": "uint256"
 							},
 							{
-								"internalType": "bool",
-								"name": "inLibrary",
-								"type": "bool"
+								"internalType": "uint256",
+								"name": "copies",
+								"type": "uint256"
 							}
 						],
-						"internalType": "struct BookLibrary.Book[]",
-						"name": "",
+						"internalType": "struct BookLibrary.BookAvailability[]",
+						"name": "availability_",
 						"type": "tuple[]"
 					}
 				],
@@ -181,7 +205,7 @@
 						"type": "uint256"
 					}
 				],
-				"name": "getBorrowerHistory",
+				"name": "getBorrowHistory",
 				"outputs": [
 					{
 						"internalType": "address[]",
@@ -231,15 +255,73 @@
 						"type": "uint256"
 					}
 				],
-				"name": "setBookCopies",
+				"name": "setAvailableBookCopies",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "stockAvailable",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			}
 		],
 		"devdoc": {
 			"kind": "dev",
-			"methods": {},
+			"methods": {
+				"addBook(string,uint256)": {
+					"details": "Add a book to the library.",
+					"params": {
+						"_copies": "the initial copies of the book",
+						"_name": "the book name"
+					}
+				},
+				"borrowBook(uint256)": {
+					"details": "Borrow book from library",
+					"params": {
+						"_bookId": "id of the book to borrowed"
+					}
+				},
+				"getAvailableBooks()": {
+					"details": "Gets a list of all books with copies available for borrowing.",
+					"returns": {
+						"availability_": "array of BookAvailability, only contains books with one or more copies."
+					}
+				},
+				"getBorrowHistory(uint256)": {
+					"details": "Returns a list of all the borrowers for a book.",
+					"params": {
+						"_bookId": "id of the book"
+					}
+				},
+				"returnBook(uint256)": {
+					"details": "Return book to library",
+					"params": {
+						"_bookId": "id of the book to return. Book has to be previously borrowed before returning."
+					}
+				},
+				"setAvailableBookCopies(uint256,uint256)": {
+					"details": "Sets the amount of available copies for an existing book in the library.",
+					"params": {
+						"_bookId": "id of the book",
+						"_copies": "new amount of copies. Will replace the existing number of available copies. "
+					}
+				}
+			},
 			"version": 1
 		},
 		"userdoc": {
@@ -265,11 +347,11 @@
 	},
 	"sources": {
 		"contracts/BookLibrary.sol": {
-			"keccak256": "0xbe85e32249fc5d7022a5aedc38d334ce7a9c802142c5929fa8676a5adb72d867",
+			"keccak256": "0x79dcfd3c2f494987d13a48d8789b6dbfefd929f9ee579b4d001b2cd144216d80",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://58c3d10a4efd6fb48b1f027f01106fc47f97e186d1a39be319c54960b35850b9",
-				"dweb:/ipfs/QmcuvKreorU7yMT8CRpG4ARaTEAk3PiqoZgVQd7k1XisKX"
+				"bzz-raw://cf12790460336c86c65af840dc6a63132649215a0b38b9ed42bdd5dbeb5369c6",
+				"dweb:/ipfs/Qma8a7B7ZqJZSg7cvnzrH4YSeytEiNLW1s97Pj63wN8Ki5"
 			]
 		},
 		"contracts/Ownable.sol": {

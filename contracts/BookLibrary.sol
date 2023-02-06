@@ -13,12 +13,11 @@ contract BookLibrary is Ownable {
 
     Book[] public books;
 
-    // bookId -> list of users who previously borrowed it
-    mapping (uint => address[]) public borrowHistory;
+    mapping (bytes32 => bool) savedBookNames;
 
     struct Book {
         string name;
-        bool inLibrary;
+        address[] borrowHistory; // list of addresses that borrowed this book
     }
 
     event BookAdded(uint id);
@@ -40,7 +39,7 @@ contract BookLibrary is Ownable {
 
         // can borrow
         booksBorrowed[_bookId][borrower] = true;
-        borrowHistory[_bookId].push(borrower);
+        books[_bookId].borrowHistory.push(borrower);
         stockAvailable[_bookId]--;
 
         emit BookBorrowed(_bookId, borrower, stockAvailable[_bookId]);
@@ -59,34 +58,12 @@ contract BookLibrary is Ownable {
         
         emit BookReturned(_bookId, msg.sender, stockAvailable[_bookId]);
     }
-
-    struct BookAvailability {
-        uint bookId;
-        uint copies;
-    }
-
+    
     /**
-     * @dev Gets a list of all books with copies available for borrowing.
-     * @return availability_ array of BookAvailability, only contains books with one or more copies.
+     * @dev Returns the number of books in the library.
      */
-    function getAvailableBooks() external view returns(BookAvailability[] memory availability_) {
-        uint totalAvailableBooks = 0;
-        for (uint i = 0; i < books.length; i++) {
-            if (stockAvailable[i] > 0) {
-                totalAvailableBooks++;
-            }
-        }
-
-        BookAvailability[] memory result = new BookAvailability[](totalAvailableBooks);
-        uint j = 0;
-        for (uint i = 0; i < books.length; i++) {
-            if (stockAvailable[i] > 0) {
-                result[j] = BookAvailability(i, stockAvailable[i]);
-                j++;
-            }
-        }
-
-        return result;
+    function getBookCount() external view returns(uint) {
+        return books.length;
     }
 
     /**
@@ -95,7 +72,13 @@ contract BookLibrary is Ownable {
      * @param _copies the initial copies of the book
      */
     function addBook(string memory _name, uint _copies) external onlyOwner {
-        books.push(Book(_name, true));
+        require(bytes(_name).length > 0, "Book name cannot be empty");
+
+        bytes32 nameHash = keccak256(abi.encodePacked(_name));
+        require(!savedBookNames[nameHash], "Book with that name already exists in library");
+
+        savedBookNames[nameHash] = true;
+        books.push(Book(_name, new address[](0)));
         uint bookId = books.length - 1;
 
         emit BookAdded(bookId);
@@ -108,7 +91,7 @@ contract BookLibrary is Ownable {
      * @param _bookId id of the book
      */
     function getBorrowHistory(uint _bookId) external view returns(address[] memory) {
-        return borrowHistory[_bookId];
+        return books[_bookId].borrowHistory;
     }
 
     /**
@@ -117,7 +100,7 @@ contract BookLibrary is Ownable {
      * @param _copies new amount of copies. Will replace the existing number of available copies. 
      */
     function setAvailableBookCopies(uint _bookId, uint _copies) public onlyOwner {
-        require(books[_bookId].inLibrary, "Book not in library");
+        require(bytes(books[_bookId].name).length > 0, "Book not in library");
 
         uint previousCopies = stockAvailable[_bookId];
         stockAvailable[_bookId] = _copies;
